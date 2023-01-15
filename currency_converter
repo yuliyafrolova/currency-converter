@@ -1,0 +1,32 @@
+import json
+import requests
+curr_code = input().lower()
+url = f"http://www.floatrates.com/daily/{curr_code}.json"
+response = requests.get(url)
+response_decode = dict(json.loads(response.text))
+cache = {}
+if curr_code.lower() == 'usd':
+    cache = {'eur':response_decode['eur']['rate']}
+elif curr_code.lower() == 'eur':
+    cache = {'usd': response_decode['usd']['rate']}
+else:
+    cache = {'usd': float(response_decode['usd']['rate']), 'eur': float(response_decode['eur']['rate'])}
+
+while True:
+    curr_2 = input().lower()
+    if curr_2 == "":
+        break
+    amount = float(input())
+    print("Checking the cache...")
+    if curr_2 in cache:
+        rate_1 = float(cache[curr_2])
+        print('Oh! It is in the cache!')
+        print(f"You received {round(int(amount) * rate_1,2)} {curr_2.upper()}.")
+    else:
+        print('Sorry, but it is not in the cache!')
+        for x in response_decode:
+            if x == curr_2.lower():
+                rate = float(response_decode[curr_2]['rate'])
+                cache.update({x :response_decode[curr_2]['rate']})
+
+                print(f"You received {round(int(amount) * float(rate),2)} {curr_2.upper()}.")
